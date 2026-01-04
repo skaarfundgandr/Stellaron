@@ -13,7 +13,7 @@ use crate::handlers::epub_handler::{parse_epub_meta, BookMetadata};
 
 #[tauri::command]
 pub async fn fetch_metadata(book_id: i32) -> Result<Option<BookMetadata>, String> {
-    let repo = BookRepo::new().await;
+    let repo = BookRepo::new();
     let books = repo.get_by_id(book_id).await.map_err(|e| e.to_string())?;
 
     let book = match books {
@@ -35,8 +35,13 @@ pub async fn fetch_metadata(book_id: i32) -> Result<Option<BookMetadata>, String
 
 #[tauri::command]
 pub async fn list_metadata() -> Result<Vec<BookMetadata>, String> {
-    let repo = BookRepo::new().await;
-    let books = repo.get_all().await.map_err(|e| e.to_string())?;
+    let repo: BookRepo = BookRepo::new();
+    let books = repo
+        .get_all()
+        .await
+        .map_err(
+            |e| e.to_string()
+        )?;
 
     let book_list = match books {
         Some(b) => b,
@@ -64,7 +69,7 @@ pub async fn update_metadata(
     published_date: Option<String>,
     isbn: Option<String>,
 ) -> Result<(), String> {
-    let repo = BookRepo::new().await;
+    let repo = BookRepo::new();
     if let Some(mut books) = repo
         .search_by_title(&book_name)
         .await

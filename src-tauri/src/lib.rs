@@ -1,6 +1,4 @@
-pub mod api;
 pub mod commands;
-pub mod controllers;
 pub mod data;
 pub mod handlers;
 pub mod opds;

@@ -49,7 +49,7 @@ pub async fn read_epub(path: &str) -> Result<String, String> {
 /// Refer to `Books` struct in `data::models::books` for book details structure.
 #[tauri::command]
 pub async fn list_books() -> Result<Vec<BookResponse>, String> {
-    let repo = BookRepo::new().await;
+    let repo: BookRepo = BookRepo::new();
     let books_list = repo.get_all().await.map_err(|e| e.to_string())?;
 
     let book_responses = match books_list {
@@ -78,7 +78,7 @@ pub async fn list_books() -> Result<Vec<BookResponse>, String> {
 /// NOTE: Option is used to handle cases where the book may not be found.
 #[tauri::command]
 pub async fn get_book_details(book_id: i32) -> Result<Option<BookResponse>, String> {
-    let repo = BookRepo::new().await;
+    let repo: BookRepo = BookRepo::new();
     let book = repo.get_by_id(book_id).await.map_err(|e| e.to_string())?;
 
     match book {
@@ -239,7 +239,7 @@ pub async fn scan_books_directory(directory_path: &str) -> Result<(), String> {
 /// * `Result<bool, String>` - On success, returns true if read, false otherwise
 #[tauri::command]
 pub async fn is_book_read(user_id: i32, book_id: i32) -> Result<bool, String> {
-    let repo = ReadingProgressRepo::new().await;
+    let repo: ReadingProgressRepo = ReadingProgressRepo::new();
     match repo
         .get_by_user_and_book(user_id, book_id)
         .await
@@ -259,7 +259,7 @@ pub async fn is_book_read(user_id: i32, book_id: i32) -> Result<bool, String> {
 /// * `Result<Option<Vec<u8>>, String>` - On success, returns Some(byte vector) if found, None otherwise; on failure, returns an error message
 #[tauri::command]
 pub async fn get_cover_img(book_id: i32) -> Result<Option<Vec<u8>>, String> {
-    let repo = BookRepo::new().await;
+    let repo: BookRepo = BookRepo::new();
     let book: Books = match repo.get_by_id(book_id).await.map_err(|e| e.to_string())? {
         Some(book) => Ok(book),
         None => Err(String::from("Book not found")),
@@ -282,7 +282,7 @@ pub async fn get_cover_img(book_id: i32) -> Result<Option<Vec<u8>>, String> {
 /// * `Result<(), String>` - On success, returns (); on failure, returns an error message
 #[tauri::command]
 pub async fn remove_book(book_id: i32) -> Result<bool, String> {
-    let repo = BookRepo::new().await;
+    let repo: BookRepo = BookRepo::new();
     repo.delete(book_id).await.map_err(|e| e.to_string())?;
 
     Ok(true)

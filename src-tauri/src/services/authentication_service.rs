@@ -94,7 +94,7 @@ impl AuthenticationService {
         username: &str,
         password: &str,
     ) -> Result<bool, password_hash::Error> {
-        let repo = UserRepo::new().await;
+        let repo: UserRepo = UserRepo::new();
 
         match repo.search_by_username_exact(username).await {
             Ok(Some(user)) => {

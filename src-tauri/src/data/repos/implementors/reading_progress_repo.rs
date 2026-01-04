@@ -13,7 +13,7 @@ use crate::data::{
 pub struct ReadingProgressRepo;
 
 impl ReadingProgressRepo {
-    pub async fn new() -> Self {
+    pub fn new() -> Self {
         ReadingProgressRepo
     }
 

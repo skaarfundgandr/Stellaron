@@ -18,7 +18,7 @@ pub async fn login(username: &str, password: &str) -> Result<bool, String> {
 pub async fn register(username: &str, password: &str) -> Result<bool, String> {
     let auth = AuthenticationService::new();
 
-    let repo = UserRepo::new().await;
+    let repo: UserRepo = UserRepo::new();
 
     let hashed_password = auth
         .hash_password_async(password)

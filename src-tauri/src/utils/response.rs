@@ -10,6 +10,8 @@ use crate::data::{
         traits::repository::Repository,
     },
 };
+use crate::data::models::publishers::Publishers;
+
 #[derive(Serialize, Deserialize)]
 pub struct BookResponse {
     pub book_id: i32,
@@ -27,9 +29,9 @@ pub struct BookResponse {
 
 impl BookResponse {
     pub async fn from_book(book: Books) -> Result<Self, Box<dyn std::error::Error>> {
-        let author_repo = BookAuthorRepo::new().await;
+        let author_repo: BookAuthorRepo = BookAuthorRepo::new();
 
-        let publisher_repo = PublisherRepo::new().await;
+        let publisher_repo: PublisherRepo = PublisherRepo::new();
 
         let author = match author_repo.get_authors_by_book(book.book_id).await? {
             Some(authors) if !authors.is_empty() => Some(authors[0].name.clone()),
@@ -38,7 +40,7 @@ impl BookResponse {
 
         let publisher = match book.publisher_id {
             Some(pid) => {
-                let publisher = publisher_repo.get_by_id(pid).await?;
+                let publisher: Option<Publishers> = publisher_repo.get_by_id(pid).await?;
                 publisher.map(|p| p.name)
             }
             None => None,

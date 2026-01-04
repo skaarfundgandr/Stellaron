@@ -13,7 +13,7 @@ use crate::data::repos::traits::repository::Repository;
 /// Requires a user ID and a book ID.
 #[tauri::command]
 pub async fn add_book_to_user_library(user_id: i32, book_id: i32) -> Result<(), String> {
-    let repo = UserLibraryRepo::new().await;
+    let repo: UserLibraryRepo = UserLibraryRepo::new();
     let new_user_library_entry = NewUserLibrary { user_id, book_id };
     repo.add(new_user_library_entry)
         .await
@@ -24,7 +24,7 @@ pub async fn add_book_to_user_library(user_id: i32, book_id: i32) -> Result<(), 
 /// Requires a user ID.
 #[tauri::command]
 pub async fn list_user_library_books(user_id: i32) -> Result<Vec<Books>, String> {
-    let repo = UserLibraryRepo::new().await;
+    let repo: UserLibraryRepo = UserLibraryRepo::new();
     let books = repo
         .get_books_by_user(user_id)
         .await
@@ -36,7 +36,7 @@ pub async fn list_user_library_books(user_id: i32) -> Result<Vec<Books>, String>
 /// Requires a user ID and a book ID.
 #[tauri::command]
 pub async fn remove_book_from_user_library(user_id: i32, book_id: i32) -> Result<(), String> {
-    let repo = UserLibraryRepo::new().await;
+    let repo: UserLibraryRepo = UserLibraryRepo::new();
     repo.delete((user_id, book_id))
         .await
         .map_err(|e| e.to_string())

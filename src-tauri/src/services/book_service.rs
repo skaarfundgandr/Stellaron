@@ -18,7 +18,7 @@ pub async fn add_book_from_metadata(
     metadata: &BookMetadata,
     publisher_id: Option<i32>,
 ) -> Result<(), Error> {
-    let repo = BookRepo::new().await;
+    let repo = BookRepo::new();
 
     // Check for duplicate by checksum
     if let Some(_existing) = repo.search_by_checksum(&metadata.checksum).await? {
@@ -52,8 +52,8 @@ pub async fn add_book_from_metadata(
         })?;
 
     for author in &metadata.authors {
-        let author_repo = AuthorRepo::new().await;
-        let book_author_repo  = BookAuthorRepo::new().await;
+        let author_repo = AuthorRepo::new();
+        let book_author_repo  = BookAuthorRepo::new();
 
         let existing_author = author_repo
             .search_by_name(&author)
@@ -108,7 +108,7 @@ pub async fn add_book_from_metadata(
 
 /// Checks if a book with the given checksum already exists in the database.
 pub async fn book_exists_by_checksum(checksum: &str) -> Result<bool, Error> {
-    let repo = BookRepo::new().await;
+    let repo = BookRepo::new();
     Ok(repo.search_by_checksum(checksum).await?.is_some())
 }
 
@@ -117,7 +117,7 @@ pub async fn book_exists_by_checksum(checksum: &str) -> Result<bool, Error> {
 pub async fn extract_book_html_content(
     book_id: i32,
 ) -> Result<String, Box<dyn std::error::Error + Send + Sync>> {
-    let repo = BookRepo::new().await;
+    let repo = BookRepo::new();
 
     let book = repo
         .get_by_id(book_id)
@@ -139,7 +139,7 @@ pub async fn add_bookmark(
     chapter_title: Option<&str>,
     page_number: Option<i32>,
 ) -> Result<(), Error> {
-    let repo = BookmarkRepo::new().await;
+    let repo = BookmarkRepo::new();
 
     let new_bookmark = NewBookmark {
         user_id,
@@ -157,13 +157,13 @@ pub async fn get_bookmarks(
     user_id: i32,
     book_id: i32,
 ) -> Result<Option<Vec<crate::data::models::bookmarks::Bookmarks>>, Error> {
-    let repo = BookmarkRepo::new().await;
+    let repo = BookmarkRepo::new();
     repo.get_by_user_and_book(user_id, book_id).await
 }
 
 /// Deletes a bookmark by its ID.
 pub async fn delete_bookmark(bookmark_id: i32) -> Result<(), Error> {
-    let repo = BookmarkRepo::new().await;
+    let repo = BookmarkRepo::new();
     repo.delete(bookmark_id).await
 }
 
@@ -178,7 +178,7 @@ pub async fn add_annotation(
     note: Option<&str>,
     color: Option<&str>,
 ) -> Result<(), Error> {
-    let repo = AnnotationRepo::new().await;
+    let repo = AnnotationRepo::new();
 
     let new_annotation = NewAnnotation {
         user_id,
@@ -199,13 +199,13 @@ pub async fn get_annotations(
     user_id: i32,
     book_id: i32,
 ) -> Result<Option<Vec<crate::data::models::annotations::Annotations>>, Error> {
-    let repo = AnnotationRepo::new().await;
+    let repo = AnnotationRepo::new();
     repo.get_by_user_and_book(user_id, book_id).await
 }
 
 /// Deletes an annotation by its ID.
 pub async fn delete_annotation(annotation_id: i32) -> Result<(), Error> {
-    let repo = AnnotationRepo::new().await;
+    let repo = AnnotationRepo::new();
     repo.delete(annotation_id).await
 }
 
@@ -219,7 +219,7 @@ pub async fn update_annotation(
     note: Option<&str>,
     color: Option<&str>,
 ) -> Result<(), Error> {
-    let repo = AnnotationRepo::new().await;
+    let repo = AnnotationRepo::new();
 
     let update = crate::data::models::annotations::UpdateAnnotation {
         chapter_title,

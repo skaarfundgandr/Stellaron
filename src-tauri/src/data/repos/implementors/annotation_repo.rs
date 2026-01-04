@@ -14,7 +14,7 @@ use crate::data::{
 pub struct AnnotationRepo;
 
 impl AnnotationRepo {
-    pub async fn new() -> Self {
+    pub fn new() -> Self {
         AnnotationRepo
     }
 

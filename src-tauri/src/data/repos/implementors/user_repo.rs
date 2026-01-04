@@ -13,7 +13,7 @@ use crate::data::{
 pub struct UserRepo;
 
 impl UserRepo {
-    pub async fn new() -> Self {
+    pub fn new() -> Self {
         UserRepo
     }
 

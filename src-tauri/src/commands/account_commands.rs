@@ -1,4 +1,5 @@
 use crate::data::models::users::Users;
+use crate::data::repos::implementors::user_repo::UserRepo;
 
 /// Command to get account information by username.
 /// Returns user details if found, otherwise returns an error message.
@@ -10,7 +11,7 @@ use crate::data::models::users::Users;
 #[tauri::command]
 pub async fn get_account_info(username: &str) -> Result<Users, String> {
     // Placeholder implementation
-    let repo = crate::data::repos::implementors::user_repo::UserRepo::new().await;
+    let repo: UserRepo = UserRepo::new();
     let user = repo
         .search_by_username_exact(username)
         .await

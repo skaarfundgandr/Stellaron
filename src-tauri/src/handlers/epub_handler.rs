@@ -383,7 +383,7 @@ pub async fn export_epub_contents_to_disk(
 pub async fn get_cover_image_streamed(
     id: i32,
 ) -> Result<Vec<u8>, Box<dyn std::error::Error + Send + Sync>> {
-    let repo = BookRepo::new().await;
+    let repo: BookRepo = BookRepo::new();
 
     if let Some(book) = repo.get_by_id(id).await? {
         let epub = Epub::open(book.file_path.as_ref().ok_or("No file path")?)?;

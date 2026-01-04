@@ -13,7 +13,7 @@ use crate::data::{
 pub struct BookmarkRepo;
 
 impl BookmarkRepo {
-    pub async fn new() -> Self {
+    pub fn new() -> Self {
         BookmarkRepo
     }
 
