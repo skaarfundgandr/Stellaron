@@ -1,0 +1,10 @@
+- [ ] Rewrite entire DB structure without affecting existing functionality
+    - Remove multi user support
+    - Simplify relations
+    - Optimize for single user local usage
+- [ ] Add PDF support
+- [ ] Add MOBI support
+- [ ] Rewrite tests to match new DB structure
+- [ ] Custom CSS theming support
+- [ ] Store reading progress in the database
+- [ ] Implement favorites functionality
