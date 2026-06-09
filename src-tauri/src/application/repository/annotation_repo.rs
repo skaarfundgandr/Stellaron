@@ -59,7 +59,8 @@ impl AnnotationRepository for AnnotationRepoImpl {
                 .execute(connection)
                 .await?;
             Ok::<(), diesel::result::Error>(())
-        }).await?;
+        })
+        .await?;
 
         Ok(())
     }
@@ -73,8 +74,8 @@ impl AnnotationRepository for AnnotationRepoImpl {
             diesel::delete(
                 annotations::dsl::annotations.filter(annotations::annotation_id.eq(find_id)),
             )
-                .execute(connection)
-                .await?;
+            .execute(connection)
+            .await?;
             Ok::<(), diesel::result::Error>(())
         })
         .await?;

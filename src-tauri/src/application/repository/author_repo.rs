@@ -43,7 +43,7 @@ impl AuthorRepository for AuthorRepoImpl {
             None => {
                 // Insert new author
                 let new_row = NewAuthorRow { name: author_name };
-                
+
                 conn.transaction(async |connection| {
                     diesel::insert_into(authors::table)
                         .values(&new_row)

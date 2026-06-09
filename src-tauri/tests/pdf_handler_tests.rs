@@ -1,11 +1,7 @@
 use stellaron_lib::infrastructure::file_handlers::pdf_handler::*;
 
 fn fixture_path(name: &str) -> String {
-    format!(
-        "{}/tests/fixtures/{}",
-        env!("CARGO_MANIFEST_DIR"),
-        name
-    )
+    format!("{}/tests/fixtures/{}", env!("CARGO_MANIFEST_DIR"), name)
 }
 
 #[tokio::test]
@@ -66,7 +62,10 @@ async fn test_read_pdf_page() {
     );
     let page = result.unwrap();
     assert_eq!(page.page_number, 0, "First page should be numbered 0");
-    assert!(!page.image_data.is_empty(), "Page image should not be empty");
+    assert!(
+        !page.image_data.is_empty(),
+        "Page image should not be empty"
+    );
     assert!(page.width > 0, "Page width should be positive");
     assert!(page.height > 0, "Page height should be positive");
 }

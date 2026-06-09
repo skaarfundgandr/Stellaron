@@ -68,11 +68,9 @@ impl BookmarkRepository for BookmarkRepoImpl {
         let mut conn = connect_from_pool().await?;
 
         conn.transaction(async |connection| {
-            diesel::delete(
-                bookmarks::dsl::bookmarks.filter(bookmarks::bookmark_id.eq(find_id)),
-            )
-            .execute(connection)
-            .await?;
+            diesel::delete(bookmarks::dsl::bookmarks.filter(bookmarks::bookmark_id.eq(find_id)))
+                .execute(connection)
+                .await?;
             Ok::<(), diesel::result::Error>(())
         })
         .await?;

@@ -8,8 +8,7 @@ pub async fn get_progress(
     book_id: i32,
     state: &AppState,
 ) -> Result<Option<ReadingProgress>, DomainError> {
-    crate::application::reading_progress::get_progress(book_id, &state.reading_progress_repo)
-        .await
+    crate::application::reading_progress::get_progress(book_id, &state.reading_progress_repo).await
 }
 
 /// Creates or updates reading progress for a book (upsert).

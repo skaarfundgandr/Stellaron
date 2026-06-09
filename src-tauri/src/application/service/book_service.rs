@@ -39,16 +39,12 @@ pub async fn fetch_metadata(
     };
 
     let metadata = match book.file_type.as_deref() {
-        Some("pdf") => {
-            crate::infrastructure::file_handlers::pdf_handler::parse_pdf_meta(path)
-                .await
-                .map_err(|e| crate::domain::error::DomainError::Parse(e.to_string()))?
-        }
-        _ => {
-            crate::infrastructure::file_handlers::epub_handler::parse_epub_meta(path)
-                .await
-                .map_err(|e| crate::domain::error::DomainError::Parse(e.to_string()))?
-        }
+        Some("pdf") => crate::infrastructure::file_handlers::pdf_handler::parse_pdf_meta(path)
+            .await
+            .map_err(|e| crate::domain::error::DomainError::Parse(e.to_string()))?,
+        _ => crate::infrastructure::file_handlers::epub_handler::parse_epub_meta(path)
+            .await
+            .map_err(|e| crate::domain::error::DomainError::Parse(e.to_string()))?,
     };
 
     Ok(Some(metadata))
@@ -85,8 +81,10 @@ pub async fn list_metadata(
                         .await
                 }
                 _ => {
-                    crate::infrastructure::file_handlers::epub_handler::parse_epub_meta(path.clone())
-                        .await
+                    crate::infrastructure::file_handlers::epub_handler::parse_epub_meta(
+                        path.clone(),
+                    )
+                    .await
                 }
             };
             if let Ok(meta) = meta_result {

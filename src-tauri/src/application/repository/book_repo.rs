@@ -57,33 +57,34 @@ impl BookRepoImpl {
             cover_image_path: book.cover_image_path.as_deref(),
             checksum: book.checksum.as_deref(),
         };
-        
-        let book_id = conn.transaction(async |connection| {
-            diesel::insert_into(books::table)
-                .values(&new_row)
-                .execute(connection)
-                .await?;
 
-            // Get the last inserted row ID reliably
-            let result = sql_query("SELECT last_insert_rowid() as book_id")
-                .get_result::<LastInsertRow>(connection)
-                .await?;
-            let book_id = result.book_id;
-
-            // Link all authors in the same transaction
-            for (author_id, _author_name) in author_ids {
-                let link = BookAuthorRow {
-                    book_id,
-                    author_id: *author_id,
-                };
-                diesel::insert_into(book_authors::table)
-                    .values(&link)
+        let book_id = conn
+            .transaction(async |connection| {
+                diesel::insert_into(books::table)
+                    .values(&new_row)
                     .execute(connection)
                     .await?;
-            }
 
-            Ok::<i32, diesel::result::Error>(book_id)
-        })
+                // Get the last inserted row ID reliably
+                let result = sql_query("SELECT last_insert_rowid() as book_id")
+                    .get_result::<LastInsertRow>(connection)
+                    .await?;
+                let book_id = result.book_id;
+
+                // Link all authors in the same transaction
+                for (author_id, _author_name) in author_ids {
+                    let link = BookAuthorRow {
+                        book_id,
+                        author_id: *author_id,
+                    };
+                    diesel::insert_into(book_authors::table)
+                        .values(&link)
+                        .execute(connection)
+                        .await?;
+                }
+
+                Ok::<i32, diesel::result::Error>(book_id)
+            })
             .await?;
 
         // Update publisher_id if set (outside transaction since it's a separate column update)

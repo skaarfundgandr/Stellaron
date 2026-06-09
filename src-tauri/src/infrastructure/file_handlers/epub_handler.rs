@@ -175,24 +175,20 @@ pub async fn get_epub_content(
                         let current_href = resource.href().as_str();
                         let resolved_href = resolve_path(current_href, src);
 
-                        if let Some(image_resource) =
-                            epub.manifest().by_href(&resolved_href)
+                        if let Some(image_resource) = epub.manifest().by_href(&resolved_href)
                             && let Ok(image_bytes) = image_resource.read_bytes()
                         {
-                            let encoded =
-                                general_purpose::STANDARD.encode(&image_bytes);
+                            let encoded = general_purpose::STANDARD.encode(&image_bytes);
                             let kind = image_resource.kind();
                             let mime_type = kind.as_str();
-                            let data_url =
-                                format!("data:{};base64,{}", mime_type, encoded);
+                            let data_url = format!("data:{};base64,{}", mime_type, encoded);
                             return format!("{}{}{}", prefix, data_url, suffix);
                         }
                         caps[0].to_string()
                     });
 
-                let content_final = image_re.replace_all(
-                    &content_img_processed,
-                    |caps: &regex::Captures| {
+                let content_final =
+                    image_re.replace_all(&content_img_processed, |caps: &regex::Captures| {
                         let prefix = &caps[1];
                         let src = &caps[2];
                         let suffix = &caps[3];
@@ -204,21 +200,17 @@ pub async fn get_epub_content(
                         let current_href = resource.href().as_str();
                         let resolved_href = resolve_path(current_href, src);
 
-                        if let Some(image_resource) =
-                            epub.manifest().by_href(&resolved_href)
+                        if let Some(image_resource) = epub.manifest().by_href(&resolved_href)
                             && let Ok(image_bytes) = image_resource.read_bytes()
                         {
-                            let encoded =
-                                general_purpose::STANDARD.encode(&image_bytes);
+                            let encoded = general_purpose::STANDARD.encode(&image_bytes);
                             let kind = image_resource.kind();
                             let mime_type = kind.as_str();
-                            let data_url =
-                                format!("data:{};base64,{}", mime_type, encoded);
+                            let data_url = format!("data:{};base64,{}", mime_type, encoded);
                             return format!("{}{}{}", prefix, data_url, suffix);
                         }
                         caps[0].to_string()
-                    },
-                );
+                    });
 
                 let document = Html::parse_document(&content_final);
                 let body_selector = Selector::parse("body").unwrap();
