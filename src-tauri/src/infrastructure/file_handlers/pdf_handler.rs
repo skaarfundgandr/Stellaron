@@ -52,9 +52,7 @@ pub struct PdfTextSpan {
 /// # Returns
 ///
 /// A vector of absolute paths to matching `.pdf` files.
-pub async fn scan_pdfs<P: AsRef<Path> + Send + 'static>(
-    dir: P,
-) -> Result<Vec<PathBuf>, JoinError> {
+pub async fn scan_pdfs<P: AsRef<Path> + Send + 'static>(dir: P) -> Result<Vec<PathBuf>, JoinError> {
     tokio::task::spawn_blocking(move || {
         WalkDir::new(dir)
             .into_iter()

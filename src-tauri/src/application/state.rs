@@ -14,4 +14,8 @@ pub struct AppState {
     pub bookmark_repo: Arc<dyn BookmarkRepository>,
     pub annotation_repo: Arc<dyn AnnotationRepository>,
     pub reading_progress_repo: Arc<dyn ReadingProgressRepository>,
+    pub rating_repo: Arc<dyn RatingRepository>,
+    pub collection_repo: Arc<dyn CollectionRepository>,
+    pub reading_session_repo: Arc<dyn ReadingSessionRepository>,
+    pub journal_note_repo: Arc<dyn JournalNoteRepository>,
 }

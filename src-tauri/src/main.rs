@@ -42,6 +42,10 @@ async fn main() {
         bookmark_repo: Arc::new(stellaron_lib::application::repository::bookmark_repo::BookmarkRepoImpl::new()),
         annotation_repo: Arc::new(stellaron_lib::application::repository::annotation_repo::AnnotationRepoImpl::new()),
         reading_progress_repo: Arc::new(stellaron_lib::application::repository::reading_progress_repo::ReadingProgressRepoImpl::new()),
+        rating_repo: Arc::new(stellaron_lib::application::repository::rating_repo::RatingRepoImpl::new()),
+        collection_repo: Arc::new(stellaron_lib::application::repository::collection_repo::CollectionRepoImpl::new()),
+        reading_session_repo: Arc::new(stellaron_lib::application::repository::reading_session_repo::ReadingSessionRepoImpl::new()),
+        journal_note_repo: Arc::new(stellaron_lib::application::repository::journal_note_repo::JournalNoteRepoImpl::new()),
     };
 
     tauri::Builder::default()

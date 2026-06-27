@@ -11,4 +11,8 @@ pub mod state;
 pub mod annotation;
 pub mod book;
 pub mod bookmark;
+pub mod collection;
+pub mod journal_note;
+pub mod rating;
 pub mod reading_progress;
+pub mod reading_session;

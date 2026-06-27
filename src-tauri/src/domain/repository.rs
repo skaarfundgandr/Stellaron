@@ -5,8 +5,14 @@ use crate::domain::models::annotation::{Annotation, NewAnnotation};
 use crate::domain::models::author::Author;
 use crate::domain::models::book::{Book, NewBook, UpdateBook};
 use crate::domain::models::bookmark::{Bookmark, NewBookmark};
+use crate::domain::models::collection::{Collection, NewCollection, UpdateCollection};
+use crate::domain::models::journal_note::{JournalNote, NewJournalNote, UpdateJournalNote};
 use crate::domain::models::publisher::Publisher;
+use crate::domain::models::rating::{NewRating, Rating};
 use crate::domain::models::reading_progress::{NewReadingProgress, ReadingProgress};
+use crate::domain::models::reading_session::{
+    EndReadingSession, NewReadingSession, ReadingSession,
+};
 
 /// Persistence operations for books.
 #[async_trait]
@@ -343,6 +349,209 @@ pub trait ReadingProgressRepository: Send + Sync {
     ///
     /// Returns [`DomainError::Database`] on query failure.
     async fn upsert(&self, progress: NewReadingProgress) -> Result<(), DomainError>;
+}
+
+// ---------------------------------------------------------------------------
+// Ratings
+// ---------------------------------------------------------------------------
+
+/// Persistence operations for ratings.
+#[async_trait]
+pub trait RatingRepository: Send + Sync {
+    /// Returns the rating for a book, or `None` if not rated.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`DomainError::Database`] on query failure.
+    async fn find_by_book(&self, book_id: i32) -> Result<Option<Rating>, DomainError>;
+
+    /// Inserts a new rating or updates the existing one (upsert by `book_id`).
+    ///
+    /// # Errors
+    ///
+    /// Returns [`DomainError::Database`] on query failure.
+    async fn upsert(&self, rating: NewRating) -> Result<(), DomainError>;
+
+    /// Deletes the rating for a book.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`DomainError::Database`] on query failure.
+    async fn delete(&self, book_id: i32) -> Result<(), DomainError>;
+
+    /// Returns all ratings in the library.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`DomainError::Database`] on query failure.
+    async fn find_all(&self) -> Result<Vec<Rating>, DomainError>;
+}
+
+// ---------------------------------------------------------------------------
+// Collections
+// ---------------------------------------------------------------------------
+
+/// Persistence operations for collections.
+#[async_trait]
+pub trait CollectionRepository: Send + Sync {
+    /// Returns all collections.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`DomainError::Database`] on query failure.
+    async fn find_all(&self) -> Result<Vec<Collection>, DomainError>;
+
+    /// Returns the collection with the given ID, or `None`.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`DomainError::Database`] on query failure.
+    async fn find_by_id(&self, id: i32) -> Result<Option<Collection>, DomainError>;
+
+    /// Creates a new collection and returns its generated ID.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`DomainError::Database`] on insert failure.
+    async fn create(&self, collection: NewCollection) -> Result<i32, DomainError>;
+
+    /// Updates an existing collection. Only `Some` fields in [`UpdateCollection`]
+    /// are applied.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`DomainError::Database`] on update failure.
+    async fn update(&self, id: i32, collection: UpdateCollection) -> Result<(), DomainError>;
+
+    /// Deletes a collection. Membership rows cascade-delete by SQLite foreign keys.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`DomainError::Database`] on query failure.
+    async fn delete(&self, id: i32) -> Result<(), DomainError>;
+
+    /// Adds a book to a collection. Idempotent — re-adding is a no-op.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`DomainError::Database`] on insert failure.
+    async fn add_book(&self, collection_id: i32, book_id: i32) -> Result<(), DomainError>;
+
+    /// Removes a book from a collection.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`DomainError::Database`] on delete failure.
+    async fn remove_book(&self, collection_id: i32, book_id: i32) -> Result<(), DomainError>;
+
+    /// Returns all books belonging to the given collection, ordered by `added_at`.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`DomainError::Database`] on query failure.
+    async fn get_books(&self, collection_id: i32) -> Result<Vec<Book>, DomainError>;
+
+    /// Returns all collections that contain the given book.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`DomainError::Database`] on query failure.
+    async fn get_collections_for_book(&self, book_id: i32) -> Result<Vec<Collection>, DomainError>;
+}
+
+// ---------------------------------------------------------------------------
+// Reading Sessions
+// ---------------------------------------------------------------------------
+
+/// Persistence operations for reading sessions.
+#[async_trait]
+pub trait ReadingSessionRepository: Send + Sync {
+    /// Returns all sessions for a book, ordered by `start_ts`.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`DomainError::Database`] on query failure.
+    async fn find_by_book(&self, book_id: i32) -> Result<Vec<ReadingSession>, DomainError>;
+
+    /// Returns the session with the given ID, or `None`.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`DomainError::Database`] on query failure.
+    async fn find_by_id(&self, id: i32) -> Result<Option<ReadingSession>, DomainError>;
+
+    /// Returns all reading sessions in the library.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`DomainError::Database`] on query failure.
+    async fn find_all(&self) -> Result<Vec<ReadingSession>, DomainError>;
+
+    /// Creates a new reading session and returns its generated ID.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`DomainError::Database`] on insert failure.
+    async fn create(&self, session: NewReadingSession) -> Result<i32, DomainError>;
+
+    /// Finalizes a session by writing its end fields (`end_position`, `end_ts`,
+    /// `duration_seconds`, `pages_read`, etc.).
+    ///
+    /// # Errors
+    ///
+    /// Returns [`DomainError::Database`] on update failure.
+    async fn finish(&self, id: i32, end: EndReadingSession) -> Result<(), DomainError>;
+
+    /// Deletes a session by ID.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`DomainError::Database`] on query failure.
+    async fn delete(&self, id: i32) -> Result<(), DomainError>;
+}
+
+// ---------------------------------------------------------------------------
+// Journal Notes
+// ---------------------------------------------------------------------------
+
+/// Persistence operations for journal notes.
+#[async_trait]
+pub trait JournalNoteRepository: Send + Sync {
+    /// Returns all journal notes for a book.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`DomainError::Database`] on query failure.
+    async fn find_by_book(&self, book_id: i32) -> Result<Vec<JournalNote>, DomainError>;
+
+    /// Returns the journal note with the given ID, or `None`.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`DomainError::Database`] on query failure.
+    async fn find_by_id(&self, id: i32) -> Result<Option<JournalNote>, DomainError>;
+
+    /// Inserts a new journal note and returns its generated ID.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`DomainError::Database`] on insert failure.
+    async fn insert(&self, note: NewJournalNote) -> Result<i32, DomainError>;
+
+    /// Updates an existing journal note. Only `Some` fields in [`UpdateJournalNote`]
+    /// are applied.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`DomainError::Database`] on update failure.
+    async fn update(&self, id: i32, note: UpdateJournalNote) -> Result<(), DomainError>;
+
+    /// Deletes a journal note by ID.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`DomainError::Database`] on query failure.
+    async fn delete(&self, id: i32) -> Result<(), DomainError>;
 }
 
 // ---------------------------------------------------------------------------

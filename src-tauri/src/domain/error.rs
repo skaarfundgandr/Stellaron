@@ -34,6 +34,10 @@ pub enum DomainError {
     /// A generic not-found error for non-book lookups.
     #[error("Not found")]
     NotFound,
+
+    /// An input failed domain-level validation (e.g. rating out of range).
+    #[error("Validation error: {0}")]
+    Validation(String),
 }
 
 impl From<diesel::result::Error> for DomainError {
