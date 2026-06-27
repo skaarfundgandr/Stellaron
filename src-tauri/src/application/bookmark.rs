@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use crate::domain::error::DomainError;
 use crate::domain::models::bookmark::Bookmark;
+use crate::domain::models::bookmark::NewBookmark;
 use crate::domain::repository::*;
 
 /// Creates a new bookmark for a book.

@@ -22,3 +22,15 @@ pub struct Annotation {
     /// ISO 8601 timestamp of the last modification.
     pub updated_at: Option<String>,
 }
+
+/// Input data for creating a new annotation.
+#[derive(Debug, Clone)]
+pub struct NewAnnotation {
+    pub book_id: i32,
+    pub chapter_title: Option<String>,
+    pub start_position: String,
+    pub end_position: String,
+    pub highlighted_text: Option<String>,
+    pub note: Option<String>,
+    pub color: Option<String>,
+}

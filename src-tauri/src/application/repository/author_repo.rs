@@ -5,7 +5,7 @@ use diesel_async::{AsyncConnection, RunQueryDsl};
 use crate::domain::error::DomainError;
 use crate::domain::models::author::Author;
 use crate::domain::repository::AuthorRepository;
-use crate::infrastructure::database::database::{connect_from_pool, lock_db};
+use crate::infrastructure::database::database::connect_from_pool;
 use crate::infrastructure::database::models::author::{AuthorRow, NewAuthorRow};
 use crate::infrastructure::database::models::schema::{authors, book_authors};
 
@@ -28,7 +28,6 @@ impl Default for AuthorRepoImpl {
 impl AuthorRepository for AuthorRepoImpl {
     /// Finds an existing author by name, or inserts a new one and returns it.
     async fn find_or_create(&self, author_name: &str) -> Result<Author, DomainError> {
-        let _db_lock = lock_db();
         let mut conn = connect_from_pool().await?;
 
         // Check if author exists
@@ -43,7 +42,7 @@ impl AuthorRepository for AuthorRepoImpl {
             None => {
                 // Insert new author
                 let new_row = NewAuthorRow { name: author_name };
-                
+
                 conn.transaction(async |connection| {
                     diesel::insert_into(authors::table)
                         .values(&new_row)

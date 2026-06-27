@@ -1,10 +1,4 @@
-use std::{
-    env,
-    sync::{
-        Arc,
-        atomic::{AtomicBool, Ordering},
-    },
-};
+use std::env;
 
 use diesel::SqliteConnection;
 use diesel_async::{
@@ -17,7 +11,6 @@ use diesel_async::{
 };
 use dotenvy::dotenv;
 use once_cell::sync::Lazy;
-use tokio::sync::Mutex;
 
 /// Type alias for the deadpool-backed async SQLite connection pool.
 pub type DbPool = Pool<SyncConnectionWrapper<SqliteConnection>>;
@@ -39,8 +32,9 @@ pub async fn connect_from_pool()
 
 /// Creates a new deadpool connection pool for the given SQLite database URL.
 ///
-/// A `post_create` hook sets SQLite pragmas (`foreign_keys`, WAL mode,
-/// `synchronous = NORMAL`, `mmap_size`) on the first connection created.
+/// A `post_create` hook sets SQLite pragmas on every new connection:
+/// `busy_timeout` first (so later pragmas can wait), then WAL mode,
+/// `synchronous = NORMAL`, and foreign-key enforcement.
 ///
 /// # Arguments
 ///
@@ -57,27 +51,27 @@ pub fn create_pool(database_url: &str) -> DbPool {
         .post_create(Hook::async_fn(
             |conn: &mut SyncConnectionWrapper<SqliteConnection>, _meta| {
                 Box::pin(async move {
-                    if !PRAGMAS_SET.load(Ordering::Relaxed) {
-                        let result = conn
-                            .batch_execute(
-                                "
-                                PRAGMA foreign_keys = ON;
-                                PRAGMA journal_mode = WAL;
-                                PRAGMA synchronous = NORMAL;
-                                PRAGMA mmap_size = 30000000000;
-                            ",
-                            )
-                            .await;
-                        if result.is_ok() {
-                            PRAGMAS_SET.store(true, Ordering::Relaxed);
-                        }
-
-                        result.map_err(|e| {
-                            HookError::Message(format!("Failed to set SQLite pragmas: {e}").into())
-                        })
-                    } else {
-                        Ok(())
-                    }
+                    conn.batch_execute("PRAGMA busy_timeout = 2000;")
+                        .await
+                        .map_err(|e| {
+                            HookError::Message(format!("Failed to set busy_timeout: {e}").into())
+                        })?;
+                    conn.batch_execute("PRAGMA journal_mode = WAL;")
+                        .await
+                        .map_err(|e| {
+                            HookError::Message(format!("Failed to set journal_mode: {e}").into())
+                        })?;
+                    conn.batch_execute("PRAGMA synchronous = NORMAL;")
+                        .await
+                        .map_err(|e| {
+                            HookError::Message(format!("Failed to set synchronous: {e}").into())
+                        })?;
+                    conn.batch_execute("PRAGMA foreign_keys = ON;")
+                        .await
+                        .map_err(|e| {
+                            HookError::Message(format!("Failed to set foreign_keys: {e}").into())
+                        })?;
+                    Ok(())
                 })
             },
         ))
@@ -91,17 +85,3 @@ static DB_POOL: Lazy<DbPool> = Lazy::new(|| {
     let database_path = env::var("DATABASE_URL").unwrap_or_else(|_| "./database.db".to_string());
     create_pool(&database_path)
 });
-
-/// Whether SQLite pragmas have already been set on at least one connection.
-static PRAGMAS_SET: AtomicBool = AtomicBool::new(false);
-
-/// Returns a clone of the global write lock.
-///
-/// Callers must hold this lock while performing write operations to prevent
-/// SQLite's "database is locked" errors.
-pub fn lock_db() -> Arc<Mutex<()>> {
-    DB_LOCK.clone()
-}
-
-/// Global mutex guarding all SQLite write operations.
-static DB_LOCK: Lazy<Arc<Mutex<()>>> = Lazy::new(|| Arc::new(Mutex::new(())));

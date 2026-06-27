@@ -1,7 +1,7 @@
 use crate::application::state::AppState;
 use crate::domain::error::DomainError;
 use crate::domain::models::bookmark::Bookmark;
-use crate::domain::repository::*;
+use crate::domain::models::bookmark::NewBookmark;
 
 /// Creates a new bookmark for a book.
 pub async fn add_bookmark(

@@ -4,9 +4,10 @@ use diesel::prelude::*;
 use diesel_async::{AsyncConnection, RunQueryDsl};
 
 use crate::domain::error::DomainError;
+use crate::domain::models::reading_progress::NewReadingProgress;
 use crate::domain::models::reading_progress::ReadingProgress;
-use crate::domain::repository::{NewReadingProgress, ReadingProgressRepository};
-use crate::infrastructure::database::database::{connect_from_pool, lock_db};
+use crate::domain::repository::ReadingProgressRepository;
+use crate::infrastructure::database::database::connect_from_pool;
 use crate::infrastructure::database::models::reading_progress::{
     NewReadingProgressRow, ReadingProgressRow,
 };
@@ -51,7 +52,6 @@ impl ReadingProgressRepository for ReadingProgressRepoImpl {
     /// one matched on `book_id`. The `last_read_at` timestamp is set to the
     /// current UTC time.
     async fn upsert(&self, progress: NewReadingProgress) -> Result<(), DomainError> {
-        let _db_lock = lock_db();
         let mut conn = connect_from_pool().await?;
         let now = Utc::now().format("%Y-%m-%d %H:%M:%S").to_string();
 

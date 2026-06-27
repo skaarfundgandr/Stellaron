@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
 use crate::domain::error::DomainError;
+use crate::domain::models::reading_progress::NewReadingProgress;
 use crate::domain::models::reading_progress::ReadingProgress;
 use crate::domain::repository::*;
 

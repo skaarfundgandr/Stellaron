@@ -1,36 +1,12 @@
 use async_trait::async_trait;
 
 use crate::domain::error::DomainError;
-use crate::domain::models::annotation::Annotation;
+use crate::domain::models::annotation::{Annotation, NewAnnotation};
 use crate::domain::models::author::Author;
-use crate::domain::models::book::Book;
-use crate::domain::models::bookmark::Bookmark;
+use crate::domain::models::book::{Book, NewBook, UpdateBook};
+use crate::domain::models::bookmark::{Bookmark, NewBookmark};
 use crate::domain::models::publisher::Publisher;
-use crate::domain::models::reading_progress::ReadingProgress;
-
-/// Input data for creating a new book record.
-pub struct NewBook {
-    pub title: String,
-    pub published_date: Option<String>,
-    pub publisher_id: Option<i32>,
-    pub isbn: Option<String>,
-    pub file_type: String,
-    pub file_path: String,
-    pub cover_image_path: Option<String>,
-    pub checksum: Option<String>,
-}
-
-/// Partial update input for an existing book. Only `Some` fields are applied.
-pub struct UpdateBook {
-    pub title: Option<String>,
-    pub published_date: Option<String>,
-    pub publisher_id: Option<i32>,
-    pub isbn: Option<String>,
-    pub file_type: Option<String>,
-    pub file_path: Option<String>,
-    pub cover_image_path: Option<String>,
-    pub checksum: Option<String>,
-}
+use crate::domain::models::reading_progress::{NewReadingProgress, ReadingProgress};
 
 /// Persistence operations for books.
 #[async_trait]
@@ -293,14 +269,6 @@ pub trait BookmarkRepository: Send + Sync {
     async fn delete(&self, id: i32) -> Result<(), DomainError>;
 }
 
-/// Input data for creating a new bookmark.
-pub struct NewBookmark {
-    pub book_id: i32,
-    pub chapter_title: Option<String>,
-    pub page_number: Option<i32>,
-    pub position: String,
-}
-
 /// Persistence operations for annotations (highlights with optional notes).
 #[async_trait]
 pub trait AnnotationRepository: Send + Sync {
@@ -342,17 +310,6 @@ pub trait AnnotationRepository: Send + Sync {
     async fn delete(&self, id: i32) -> Result<(), DomainError>;
 }
 
-/// Input data for creating a new annotation.
-pub struct NewAnnotation {
-    pub book_id: i32,
-    pub chapter_title: Option<String>,
-    pub start_position: String,
-    pub end_position: String,
-    pub highlighted_text: Option<String>,
-    pub note: Option<String>,
-    pub color: Option<String>,
-}
-
 /// Persistence operations for reading progress.
 #[async_trait]
 pub trait ReadingProgressRepository: Send + Sync {
@@ -388,11 +345,4 @@ pub trait ReadingProgressRepository: Send + Sync {
     async fn upsert(&self, progress: NewReadingProgress) -> Result<(), DomainError>;
 }
 
-/// Input data for creating or updating reading progress.
-pub struct NewReadingProgress {
-    pub book_id: i32,
-    pub current_position: String,
-    pub chapter_title: Option<String>,
-    pub page_number: Option<i32>,
-    pub progress_percentage: Option<f32>,
-}
+// ---------------------------------------------------------------------------

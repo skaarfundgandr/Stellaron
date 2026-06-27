@@ -4,8 +4,9 @@ use diesel_async::{AsyncConnection, RunQueryDsl};
 
 use crate::domain::error::DomainError;
 use crate::domain::models::bookmark::Bookmark;
-use crate::domain::repository::{BookmarkRepository, NewBookmark};
-use crate::infrastructure::database::database::{connect_from_pool, lock_db};
+use crate::domain::models::bookmark::NewBookmark;
+use crate::domain::repository::BookmarkRepository;
+use crate::infrastructure::database::database::connect_from_pool;
 use crate::infrastructure::database::models::bookmark::{BookmarkRow, NewBookmarkRow};
 use crate::infrastructure::database::models::schema::bookmarks;
 
@@ -40,7 +41,6 @@ impl BookmarkRepository for BookmarkRepoImpl {
 
     /// Inserts a new bookmark.
     async fn insert(&self, bookmark: NewBookmark) -> Result<(), DomainError> {
-        let _db_lock = lock_db();
         let mut conn = connect_from_pool().await?;
 
         let new_row = NewBookmarkRow {
@@ -64,15 +64,12 @@ impl BookmarkRepository for BookmarkRepoImpl {
 
     /// Deletes a bookmark by ID.
     async fn delete(&self, find_id: i32) -> Result<(), DomainError> {
-        let _db_lock = lock_db();
         let mut conn = connect_from_pool().await?;
 
         conn.transaction(async |connection| {
-            diesel::delete(
-                bookmarks::dsl::bookmarks.filter(bookmarks::bookmark_id.eq(find_id)),
-            )
-            .execute(connection)
-            .await?;
+            diesel::delete(bookmarks::dsl::bookmarks.filter(bookmarks::bookmark_id.eq(find_id)))
+                .execute(connection)
+                .await?;
             Ok::<(), diesel::result::Error>(())
         })
         .await?;

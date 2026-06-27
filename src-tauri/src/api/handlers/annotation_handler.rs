@@ -1,7 +1,7 @@
 use crate::application::state::AppState;
 use crate::domain::error::DomainError;
 use crate::domain::models::annotation::Annotation;
-use crate::domain::repository::*;
+use crate::domain::models::annotation::NewAnnotation;
 
 /// Creates a new annotation (highlight with optional note) for a book.
 #[allow(clippy::too_many_arguments)]

@@ -5,6 +5,7 @@ use serde::Serialize;
 
 use crate::domain::dto::book_dto::BookDto;
 use crate::domain::error::DomainError;
+use crate::domain::models::book::NewBook;
 use crate::domain::repository::*;
 use crate::infrastructure::file_handlers::epub_handler;
 use crate::infrastructure::file_handlers::pdf_handler;
@@ -97,7 +98,9 @@ pub async fn get_cover(
 
     match book.file_type.as_deref() {
         Some("pdf") => {
-            let path = book.file_path.as_deref()
+            let path = book
+                .file_path
+                .as_deref()
                 .ok_or_else(|| DomainError::File("No file path for PDF book".into()))?;
             match pdf_handler::get_pdf_cover(path).await {
                 Ok(img) => Ok(Some(img)),
@@ -163,7 +166,10 @@ pub async fn import_book(
             (meta, "epub".to_string())
         }
         other => {
-            return Err(DomainError::File(format!("Unsupported file type: {}", other)));
+            return Err(DomainError::File(format!(
+                "Unsupported file type: {}",
+                other
+            )));
         }
     };
 
@@ -306,7 +312,10 @@ pub async fn read_book(path: &str, file_type: &str) -> Result<BookContent, Domai
                 .map_err(|e| DomainError::Parse(e.to_string()))?;
             Ok(BookContent::Pdf(page))
         }
-        other => Err(DomainError::File(format!("Unsupported file type: {}", other))),
+        other => Err(DomainError::File(format!(
+            "Unsupported file type: {}",
+            other
+        ))),
     }
 }
 

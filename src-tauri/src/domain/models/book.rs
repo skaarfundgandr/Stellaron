@@ -1,5 +1,5 @@
 /// A book in the user's library.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, serde::Serialize)]
 pub struct Book {
     /// Auto-generated primary key.
     pub id: i32,
@@ -21,4 +21,30 @@ pub struct Book {
     pub checksum: Option<String>,
     /// ISO 8601 timestamp of when the book was imported.
     pub added_at: Option<String>,
+}
+
+/// Input data for creating a new book record.
+#[derive(Debug, Clone)]
+pub struct NewBook {
+    pub title: String,
+    pub published_date: Option<String>,
+    pub publisher_id: Option<i32>,
+    pub isbn: Option<String>,
+    pub file_type: String,
+    pub file_path: String,
+    pub cover_image_path: Option<String>,
+    pub checksum: Option<String>,
+}
+
+/// Partial update input for an existing book. Only `Some` fields are applied.
+#[derive(Debug, Clone)]
+pub struct UpdateBook {
+    pub title: Option<String>,
+    pub published_date: Option<String>,
+    pub publisher_id: Option<i32>,
+    pub isbn: Option<String>,
+    pub file_type: Option<String>,
+    pub file_path: Option<String>,
+    pub cover_image_path: Option<String>,
+    pub checksum: Option<String>,
 }

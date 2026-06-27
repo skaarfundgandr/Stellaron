@@ -16,3 +16,13 @@ pub struct ReadingProgress {
     /// ISO 8601 timestamp of when the book was last read.
     pub last_read_at: Option<String>,
 }
+
+/// Input data for creating or updating reading progress.
+#[derive(Debug, Clone)]
+pub struct NewReadingProgress {
+    pub book_id: i32,
+    pub current_position: String,
+    pub chapter_title: Option<String>,
+    pub page_number: Option<i32>,
+    pub progress_percentage: Option<f32>,
+}

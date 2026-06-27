@@ -1,15 +1,14 @@
 use crate::application::state::AppState;
 use crate::domain::error::DomainError;
+use crate::domain::models::reading_progress::NewReadingProgress;
 use crate::domain::models::reading_progress::ReadingProgress;
-use crate::domain::repository::*;
 
 /// Returns the current reading progress for a book.
 pub async fn get_progress(
     book_id: i32,
     state: &AppState,
 ) -> Result<Option<ReadingProgress>, DomainError> {
-    crate::application::reading_progress::get_progress(book_id, &state.reading_progress_repo)
-        .await
+    crate::application::reading_progress::get_progress(book_id, &state.reading_progress_repo).await
 }
 
 /// Creates or updates reading progress for a book (upsert).

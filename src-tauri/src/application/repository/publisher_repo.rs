@@ -5,7 +5,7 @@ use diesel_async::{AsyncConnection, RunQueryDsl};
 use crate::domain::error::DomainError;
 use crate::domain::models::publisher::Publisher;
 use crate::domain::repository::PublisherRepository;
-use crate::infrastructure::database::database::{connect_from_pool, lock_db};
+use crate::infrastructure::database::database::connect_from_pool;
 use crate::infrastructure::database::models::publisher::PublisherRow;
 use crate::infrastructure::database::models::schema::publishers;
 
@@ -43,7 +43,6 @@ impl PublisherRepository for PublisherRepoImpl {
 
     /// Finds an existing publisher by name, or inserts a new one and returns it.
     async fn find_or_create(&self, publisher_name: &str) -> Result<Publisher, DomainError> {
-        let _db_lock = lock_db();
         let mut conn = connect_from_pool().await?;
 
         // Check if publisher exists

@@ -14,3 +14,12 @@ pub struct Bookmark {
     /// ISO 8601 timestamp of when the bookmark was created.
     pub created_at: Option<String>,
 }
+
+/// Input data for creating a new bookmark.
+#[derive(Debug, Clone)]
+pub struct NewBookmark {
+    pub book_id: i32,
+    pub chapter_title: Option<String>,
+    pub page_number: Option<i32>,
+    pub position: String,
+}

@@ -4,8 +4,9 @@ use diesel_async::{AsyncConnection, RunQueryDsl};
 
 use crate::domain::error::DomainError;
 use crate::domain::models::annotation::Annotation;
-use crate::domain::repository::{AnnotationRepository, NewAnnotation};
-use crate::infrastructure::database::database::{connect_from_pool, lock_db};
+use crate::domain::models::annotation::NewAnnotation;
+use crate::domain::repository::AnnotationRepository;
+use crate::infrastructure::database::database::connect_from_pool;
 use crate::infrastructure::database::models::annotation::{AnnotationRow, NewAnnotationRow};
 use crate::infrastructure::database::models::schema::annotations;
 
@@ -40,7 +41,6 @@ impl AnnotationRepository for AnnotationRepoImpl {
 
     /// Inserts a new annotation.
     async fn insert(&self, annotation: NewAnnotation) -> Result<(), DomainError> {
-        let _db_lock = lock_db();
         let mut conn = connect_from_pool().await?;
 
         let new_row = NewAnnotationRow {
@@ -59,22 +59,22 @@ impl AnnotationRepository for AnnotationRepoImpl {
                 .execute(connection)
                 .await?;
             Ok::<(), diesel::result::Error>(())
-        }).await?;
+        })
+        .await?;
 
         Ok(())
     }
 
     /// Deletes an annotation by ID.
     async fn delete(&self, find_id: i32) -> Result<(), DomainError> {
-        let _db_lock = lock_db();
         let mut conn = connect_from_pool().await?;
 
         conn.transaction(async |connection| {
             diesel::delete(
                 annotations::dsl::annotations.filter(annotations::annotation_id.eq(find_id)),
             )
-                .execute(connection)
-                .await?;
+            .execute(connection)
+            .await?;
             Ok::<(), diesel::result::Error>(())
         })
         .await?;

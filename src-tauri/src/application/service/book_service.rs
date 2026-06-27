@@ -1,5 +1,5 @@
 use crate::domain::repository::BookRepository;
-use crate::infrastructure::file_handlers::BookMetadata;
+use crate::infrastructure::file_handlers::*;
 use std::sync::Arc;
 
 /// Re-parses the original ebook file for a book and returns fresh metadata.
@@ -39,16 +39,12 @@ pub async fn fetch_metadata(
     };
 
     let metadata = match book.file_type.as_deref() {
-        Some("pdf") => {
-            crate::infrastructure::file_handlers::pdf_handler::parse_pdf_meta(path)
-                .await
-                .map_err(|e| crate::domain::error::DomainError::Parse(e.to_string()))?
-        }
-        _ => {
-            crate::infrastructure::file_handlers::epub_handler::parse_epub_meta(path)
-                .await
-                .map_err(|e| crate::domain::error::DomainError::Parse(e.to_string()))?
-        }
+        Some("pdf") => pdf_handler::parse_pdf_meta(path)
+            .await
+            .map_err(|e| crate::domain::error::DomainError::Parse(e.to_string()))?,
+        _ => epub_handler::parse_epub_meta(path)
+            .await
+            .map_err(|e| crate::domain::error::DomainError::Parse(e.to_string()))?,
     };
 
     Ok(Some(metadata))
@@ -80,14 +76,8 @@ pub async fn list_metadata(
     for book in books {
         if let Some(ref path) = book.file_path {
             let meta_result = match book.file_type.as_deref() {
-                Some("pdf") => {
-                    crate::infrastructure::file_handlers::pdf_handler::parse_pdf_meta(path.clone())
-                        .await
-                }
-                _ => {
-                    crate::infrastructure::file_handlers::epub_handler::parse_epub_meta(path.clone())
-                        .await
-                }
+                Some("pdf") => pdf_handler::parse_pdf_meta(path.clone()).await,
+                _ => epub_handler::parse_epub_meta(path.clone()).await,
             };
             if let Ok(meta) = meta_result {
                 all_metadata.push(meta);
@@ -130,7 +120,7 @@ pub async fn update_metadata(
     book_repo
         .update(
             book.id,
-            crate::domain::repository::UpdateBook {
+            crate::domain::models::book::UpdateBook {
                 title: title.map(|s| s.to_string()),
                 published_date: published_date.map(|s| s.to_string()),
                 publisher_id: None,

@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use crate::domain::error::DomainError;
 use crate::domain::models::annotation::Annotation;
+use crate::domain::models::annotation::NewAnnotation;
 use crate::domain::repository::*;
 
 /// Creates a new annotation (highlight with optional note) for a book.

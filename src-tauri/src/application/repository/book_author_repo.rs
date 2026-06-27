@@ -2,7 +2,7 @@ use async_trait::async_trait;
 
 use crate::domain::error::DomainError;
 use crate::domain::repository::BookAuthorRepository;
-use crate::infrastructure::database::database::{connect_from_pool, lock_db};
+use crate::infrastructure::database::database::connect_from_pool;
 use crate::infrastructure::database::models::book_author::BookAuthorRow;
 use crate::infrastructure::database::models::schema::book_authors;
 use diesel_async::{AsyncConnection, RunQueryDsl};
@@ -26,7 +26,6 @@ impl Default for BookAuthorRepoImpl {
 impl BookAuthorRepository for BookAuthorRepoImpl {
     /// Creates a book-author link in the `book_authors` join table.
     async fn link(&self, find_book_id: i32, find_author_id: i32) -> Result<(), DomainError> {
-        let _db_lock = lock_db();
         let mut conn = connect_from_pool().await?;
 
         let row = BookAuthorRow {
